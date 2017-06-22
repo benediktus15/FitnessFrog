@@ -41,22 +41,20 @@ namespace Treehouse.FitnessFrog.Controllers
 
         public ActionResult Add()
         {
-            var entry = new Entry()
-            {
-                Date = DateTime.Today
-            };
+            PopulateSelectList();
 
-            return View(entry);
+            return View();
         }
-
+              
         [HttpPost]
-        public ActionResult AddPost(Entry entry)
+        public ActionResult Add(Entry entry)
         {
             if (ModelState.IsValid)
             {
                 _entriesRepository.AddEntry(entry);
-                return View("Index");
+                return RedirectToAction("Index");
             }
+            PopulateSelectList();
 
             return View(entry);
         }
@@ -68,7 +66,11 @@ namespace Treehouse.FitnessFrog.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            return View();
+            Entry entry = _entriesRepository.GetEntry((int)id);
+
+            PopulateSelectList();
+
+            return View(entry);
         }
 
         public ActionResult Delete(int? id)
@@ -78,7 +80,22 @@ namespace Treehouse.FitnessFrog.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            return View();
+            Entry entry = _entriesRepository.GetEntry((int)id);
+
+            return View(entry);
+        }
+
+        [HttpPost]
+        public ActionResult Delete(int id)
+        {
+            _entriesRepository.DeleteEntry(id);
+
+            return RedirectToAction("Index");
+        }
+
+        private void PopulateSelectList()
+        {
+            ViewBag.SelectListItem = new SelectList(Data.Data.Activities, "Id", "Name");
         }
     }
 }
